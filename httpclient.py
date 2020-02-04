@@ -75,7 +75,6 @@ class HTTPClient(object):
         # https://docs.python.org/2/library/urlparse.html
         parsed_url = urllib.parse.urlparse(url)
         host = parsed_url.netloc
-        scheme = parsed_url.scheme
         
         path = parsed_url.path
         if not path:
@@ -84,10 +83,6 @@ class HTTPClient(object):
         port = 80
         if parsed_url.port:
             port = parsed_url.port
-        if scheme == "https":
-            port = 443
-        
-        # print(parsed_url, port, path, host)
         
         request = "GET {} HTTP/1.1\r\n".format(path)
         request += "Host: {}\r\n".format(host)
@@ -103,7 +98,7 @@ class HTTPClient(object):
 
         print("Response:", response)
         code = 500
-        body = ""
+        body = "testing"
         return HTTPResponse(code, body)
 
     # TODO: implement this
