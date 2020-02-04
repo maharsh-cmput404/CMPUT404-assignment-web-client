@@ -96,9 +96,12 @@ class HTTPClient(object):
         response = self.recvall(self.socket)
         self.close()
 
+        response_code = int(response.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
+        response_body = response.split("\r\n\r\n")[1]   # everything after headers
+
         print("Response:", response)
-        code = 500
-        body = "testing"
+        code = response_code
+        body = response_body
         return HTTPResponse(code, body)
 
     # TODO: implement this
