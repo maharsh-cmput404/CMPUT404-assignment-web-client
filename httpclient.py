@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
+# Copyright 2020 Maharsh Patel, Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,12 +40,15 @@ class HTTPClient(object):
         self.socket.connect((host, port))
         return None
 
+    # TODO: implement this
     def get_code(self, data):
         return None
 
-    def get_headers(self,data):
+    # TODO: implement this
+    def get_headers(self, data):
         return None
 
+    # TODO: implement this
     def get_body(self, data):
         return None
     
@@ -67,11 +70,43 @@ class HTTPClient(object):
                 done = not part
         return buffer.decode('utf-8')
 
+    # TODO: implement this
     def GET(self, url, args=None):
+        # https://docs.python.org/2/library/urlparse.html
+        parsed_url = urllib.parse.urlparse(url)
+        host = parsed_url.netloc
+        scheme = parsed_url.scheme
+        
+        path = parsed_url.path
+        if not path:
+            path = "/"
+
+        port = 80
+        if parsed_url.port:
+            port = parsed_url.port
+        if scheme == "https":
+            port = 443
+        
+        # print(parsed_url, port, path, host)
+        
+        request = "GET {} HTTP/1.1\r\n".format(path)
+        request += "Host: {}\r\n".format(host)
+        request += "Accept: */*\r\n"
+        request += "Connection: close\r\n\r\n"
+
+        # print(request)
+        self.connect(host.split(":")[0], port)
+        self.sendall(request)
+
+        response = self.recvall(self.socket)
+        self.close()
+
+        print("Response:", response)
         code = 500
         body = ""
         return HTTPResponse(code, body)
 
+    # TODO: implement this
     def POST(self, url, args=None):
         code = 500
         body = ""
