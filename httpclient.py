@@ -40,16 +40,13 @@ class HTTPClient(object):
         self.socket.connect((host, port))
         return None
 
-    # TODO: implement this
     def get_code(self, data):
         response_code = int(data.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
         return response_code
 
-    # TODO: implement this
     def get_headers(self, data):
         return None
 
-    # TODO: implement this
     def get_body(self, data):
         body = data.split("\r\n\r\n")[1]   # everything after headers
         return body
@@ -72,7 +69,6 @@ class HTTPClient(object):
                 done = not part
         return buffer.decode('utf-8')
 
-    # TODO: implement this
     def GET(self, url, args=None):
         # https://docs.python.org/2/library/urlparse.html
         parsed_url = urllib.parse.urlparse(url)
@@ -107,12 +103,7 @@ class HTTPClient(object):
         body = response_body
         return HTTPResponse(code, body)
 
-    # TODO: implement this
     def POST(self, url, args=None):
-        if args:
-            content = urllib.parse.urlencode(args)
-            content_length = len(content)
-
         parsed_url = urllib.parse.urlparse(url)
         host = parsed_url.netloc
         
@@ -123,6 +114,12 @@ class HTTPClient(object):
         port = 80
         if parsed_url.port:
             port = parsed_url.port
+
+        content = ""
+        content_length = 0
+        if args:
+            content = urllib.parse.urlencode(args)
+            content_length = len(content)
         
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
         request = "POST {} HTTP/1.1\r\n".format(path)
