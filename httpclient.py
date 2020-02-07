@@ -106,8 +106,38 @@ class HTTPClient(object):
 
     # TODO: implement this
     def POST(self, url, args=None):
-        code = 500
-        body = ""
+        if args:
+            args = urllib.parse.urlencode(args)
+            
+        parsed_url = urllib.parse.urlparse(url)
+        host = parsed_url.netloc
+        
+        path = parsed_url.path
+        if not path:
+            path = "/"
+
+        port = 80
+        if parsed_url.port:
+            port = parsed_url.port
+        
+        request = "POST {} HTTP/1.1\r\n".format(path)
+        request += "Host: {}\r\n".format(host)
+        request += "Accept: */*\r\n"
+        request += "Connection: close\r\n\r\n"
+
+        self.connect(host.split(":")[0], port)
+        self.sendall(request)
+
+        response = self.recvall(self.socket)
+        self.close()
+
+        response_code = int(response.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
+        response_body = response.split("\r\n\r\n")[1]   # everything after headers
+
+        print("Response:", response)
+        print("Args:", args)
+        code = response_code
+        body = response_body
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
@@ -119,10 +149,14 @@ class HTTPClient(object):
 if __name__ == "__main__":
     client = HTTPClient()
     command = "GET"
+    print(sys.argv)
     if (len(sys.argv) <= 1):
         help()
         sys.exit(1)
     elif (len(sys.argv) == 3):
         print(client.command( sys.argv[2], sys.argv[1] ))
+    # TODO: REMOVE THESE 2 LINES - JUST FOR TESTING
+    elif (len(sys.argv) == 4):
+        print(client.command( sys.argv[2], sys.argv[1], {"a": "a", "b": "b"}))
     else:
         print(client.command( sys.argv[1] ))
