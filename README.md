@@ -25,3 +25,8 @@ https://docs.postman-echo.com/?version=latest
 
 ### Python Docs
 https://docs.python.org/2/library/urlparse.html
+
+### Mozilla Docs
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+

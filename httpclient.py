@@ -42,7 +42,8 @@ class HTTPClient(object):
 
     # TODO: implement this
     def get_code(self, data):
-        return None
+        response_code = int(data.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
+        return response_code
 
     # TODO: implement this
     def get_headers(self, data):
@@ -50,7 +51,8 @@ class HTTPClient(object):
 
     # TODO: implement this
     def get_body(self, data):
-        return None
+        body = data.split("\r\n\r\n")[1]   # everything after headers
+        return body
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -84,6 +86,7 @@ class HTTPClient(object):
         if parsed_url.port:
             port = parsed_url.port
         
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
         request = "GET {} HTTP/1.1\r\n".format(path)
         request += "Host: {}\r\n".format(host)
         request += "Accept: */*\r\n"
@@ -96,8 +99,8 @@ class HTTPClient(object):
         response = self.recvall(self.socket)
         self.close()
 
-        response_code = int(response.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
-        response_body = response.split("\r\n\r\n")[1]   # everything after headers
+        response_code = self.get_code(response)
+        response_body = self.get_body(response)
 
         print("Response:", response)
         code = response_code
@@ -107,8 +110,9 @@ class HTTPClient(object):
     # TODO: implement this
     def POST(self, url, args=None):
         if args:
-            args = urllib.parse.urlencode(args)
-            
+            content = urllib.parse.urlencode(args)
+            content_length = len(content)
+
         parsed_url = urllib.parse.urlparse(url)
         host = parsed_url.netloc
         
@@ -120,10 +124,16 @@ class HTTPClient(object):
         if parsed_url.port:
             port = parsed_url.port
         
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
         request = "POST {} HTTP/1.1\r\n".format(path)
         request += "Host: {}\r\n".format(host)
         request += "Accept: */*\r\n"
+        request += "Content-Type: application/x-www-form-urlencoded\r\n"
+        request += "Content-Length: {}\r\n".format(content_length)
         request += "Connection: close\r\n\r\n"
+
+        if content: 
+            request += content
 
         self.connect(host.split(":")[0], port)
         self.sendall(request)
@@ -131,11 +141,11 @@ class HTTPClient(object):
         response = self.recvall(self.socket)
         self.close()
 
-        response_code = int(response.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
-        response_body = response.split("\r\n\r\n")[1]   # everything after headers
+        response_code = self.get_code(response)
+        response_body = self.get_body(response)
 
         print("Response:", response)
-        print("Args:", args)
+        print("Content:", content)
         code = response_code
         body = response_body
         return HTTPResponse(code, body)
