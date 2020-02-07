@@ -25,6 +25,7 @@ https://docs.postman-echo.com/?version=latest
 
 ### Python Docs
 https://docs.python.org/2/library/urlparse.html
+https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode
 
 ### Mozilla Docs
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages

@@ -39,17 +39,31 @@ class HTTPClient(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((host, port))
         return None
+    
+    def parse_url(self, url):
+        # https://docs.python.org/2/library/urlparse.html
+        parsed_url = urllib.parse.urlparse(url)
+        host = parsed_url.netloc
 
-    def get_code(self, data):
-        response_code = int(data.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
-        return response_code
+        path = parsed_url.path
+        if not path:
+            path = "/"
+        
+        port = 80
+        if parsed_url.port:
+            port = parsed_url.port
+        
+        return (host, path, port)
+
+    def parse_response(self, response):
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
+        response_code = int(response.split("\r\n")[0].split(" ")[1])    # right after HTTP/1.1
+        body = response.split("\r\n\r\n")[1]   # everything after headers
+
+        return (response_code, body)
 
     def get_headers(self, data):
         return None
-
-    def get_body(self, data):
-        body = data.split("\r\n\r\n")[1]   # everything after headers
-        return body
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -70,17 +84,7 @@ class HTTPClient(object):
         return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
-        # https://docs.python.org/2/library/urlparse.html
-        parsed_url = urllib.parse.urlparse(url)
-        host = parsed_url.netloc
-        
-        path = parsed_url.path
-        if not path:
-            path = "/"
-
-        port = 80
-        if parsed_url.port:
-            port = parsed_url.port
+        host, path, port = self.parse_url(url)
         
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
         request = "GET {} HTTP/1.1\r\n".format(path)
@@ -88,33 +92,21 @@ class HTTPClient(object):
         request += "Accept: */*\r\n"
         request += "Connection: close\r\n\r\n"
 
-        # print(request)
         self.connect(host.split(":")[0], port)
         self.sendall(request)
 
         response = self.recvall(self.socket)
         self.close()
 
-        response_code = self.get_code(response)
-        response_body = self.get_body(response)
+        code, body = self.parse_response(response)
 
-        print("Response:", response)
-        code = response_code
-        body = response_body
+        print(response)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
-        parsed_url = urllib.parse.urlparse(url)
-        host = parsed_url.netloc
-        
-        path = parsed_url.path
-        if not path:
-            path = "/"
+        host, path, port = self.parse_url(url)
 
-        port = 80
-        if parsed_url.port:
-            port = parsed_url.port
-
+        # https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode
         content = ""
         content_length = 0
         if args:
@@ -138,13 +130,9 @@ class HTTPClient(object):
         response = self.recvall(self.socket)
         self.close()
 
-        response_code = self.get_code(response)
-        response_body = self.get_body(response)
+        code, body = self.parse_response(response)
 
-        print("Response:", response)
-        print("Content:", content)
-        code = response_code
-        body = response_body
+        print(response)
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
@@ -156,7 +144,6 @@ class HTTPClient(object):
 if __name__ == "__main__":
     client = HTTPClient()
     command = "GET"
-    print(sys.argv)
     if (len(sys.argv) <= 1):
         help()
         sys.exit(1)
