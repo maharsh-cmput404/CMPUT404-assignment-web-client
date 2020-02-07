@@ -31,3 +31,5 @@ https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages \
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 
+### Stackoverflow
+Kris, https://stackoverflow.com/questions/30686701/python-get-size-of-string-in-bytes

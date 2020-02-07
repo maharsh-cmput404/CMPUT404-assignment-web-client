@@ -111,7 +111,8 @@ class HTTPClient(object):
         content_length = 0
         if args:
             content = urllib.parse.urlencode(args)
-            content_length = len(content)
+            # Kris, https://stackoverflow.com/questions/30686701/python-get-size-of-string-in-bytes
+            content_length = len(content.encode("utf-8"))
         
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
         request = "POST {} HTTP/1.1\r\n".format(path)
